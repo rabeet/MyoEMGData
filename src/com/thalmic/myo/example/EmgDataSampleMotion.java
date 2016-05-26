@@ -101,8 +101,6 @@ public class EmgDataSampleMotion {
 		String name = "data" + count + "-" + "_MOTION_" + READING_FREQUENCY + "ms_" + MAX_RECORDS +"_RECORDS" + ".csv";
 		File data = new File(name);
 		while (data.exists()) {
-			// System.out.println("File " + data.getPath() + " exists.. Creating
-			// new file name 'data"+(count+1)+".csv'");
 			count++;
 			name = "data" + count + "-" + HOW_MANY_WORDS + "_MOTION_" + READING_FREQUENCY + "ms_" + MAX_RECORDS +"_LINES" + ".csv";
 			data = new File(name);

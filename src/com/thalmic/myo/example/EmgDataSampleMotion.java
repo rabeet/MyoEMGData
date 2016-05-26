@@ -23,7 +23,7 @@ public class EmgDataSampleMotion {
 		Scanner inp = new Scanner(System.in);
 		
 		try {
-			// Create a new "Hub" which is used by the Myo API to keep track of the Myos
+			// Create a new "Hub" which is used by the Myo API to keep track of the Myo devices
 			Hub hub = new Hub("com.example.emg-data-sample");
 
 			// hub.waitForMyo(ms) returns a Myo object if found within ms milliseconds, or null otherwise

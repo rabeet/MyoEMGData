@@ -63,7 +63,7 @@ public class EmgDataSampleMotion {
 					inp.nextLine();
 					
 					lines = 0;
-					while (maxColumnsWritten(lines)) {
+					while (!maxColumnsWritten(lines)) {
 						// run the event loop for READING_FREQUENCY milliseconds and record all values within this time
 						hub.run(READING_FREQUENCY);
 						lines = dataCollector.writeToFileMotion(file);

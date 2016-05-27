@@ -19,13 +19,14 @@ public class EmgDataSampleMotion {
 
 	public static void main(String[] args) {
 		int lines = 0;
-		int currentLetter = 65;
 		File file = null;
 		Scanner inp = new Scanner(System.in);
 		
 		try {
+			// Create a new "Hub" which is used by the Myo API to keep track of the Myo devices
 			Hub hub = new Hub("com.example.emg-data-sample");
 
+			// hub.waitForMyo(ms) returns a Myo object if found within ms milliseconds, or null otherwise
 			System.out.println("Attempting to find a Myo...");
 			Myo myo = hub.waitForMyo(10000);
 
@@ -33,8 +34,11 @@ public class EmgDataSampleMotion {
 				throw new RuntimeException("Unable to find a Myo!");
 			}
 
+			// setStreamEmg tells the Myo to send EMG data
 			System.out.println("Connected to a Myo armband!");
 			myo.setStreamEmg(StreamEmgType.STREAM_EMG_ENABLED);
+			
+			// crete an instance of a DeviceListener to record the data, and tell the hub to use it
 			DeviceListener dataCollector = new EmgDataCollector();
 			hub.addListener(dataCollector);
 
@@ -50,27 +54,22 @@ public class EmgDataSampleMotion {
 				file = new File(checkFileName());
 				file.createNewFile();
 				dataCollector.prepareFile(file, MAX_RECORDS);
-//				hub.run(READING_FREQUENCY);
 				new Scanner(System.in).nextLine();
 				
 				for (int j = 0; j < HOW_MANY_WORDS; j++) {
 					
-					// Skip J and Z -- not needed in motion
-//					if ((char)currentLetter == 'J' || (char)currentLetter == 'Z') {
-//						currentLetter++;
-//						continue;
-//					}
 					System.out.println("Please make hand gesture for word " + (j+1) + " now.");
 					System.out.println("Press enter to start recording...");
 					inp.nextLine();
-					while (maxColumnsWritten(lines)) {
+					
+					lines = 0;
+					while (!maxColumnsWritten(lines)) {
+						// run the event loop for READING_FREQUENCY milliseconds and record all values within this time
 						hub.run(READING_FREQUENCY);
 						lines = dataCollector.writeToFileMotion(file);
 					}
 					dataCollector.carriageReturn(file);
-					lines = 0;
 				}
-				currentLetter = 65;
 			}
 		} catch (Exception e) {
 			System.err.println("Error: ");
@@ -83,24 +82,25 @@ public class EmgDataSampleMotion {
 		}
 	}
 	
+	// returns true if and only if the maximum number of lines has been written to the file
 	public static boolean maxLinesWritten(int lines) {
 		if (lines == 0)
-			return true;
-		return (lines % MAX_RECORDS) != 0;
+			return false;
+		return lines >= MAX_RECORDS;
 	}
 	
+	// returns true if and only if the maximum number of columns has been written to the file
 	public static boolean maxColumnsWritten(int columns) {
-		if (columns == 0) return true;
-		return columns != 8*MAX_RECORDS;
+		if (columns == 0) return false;
+		return columns == 8 * MAX_RECORDS;
 	}
 
+	// Ensure that the file name doesn't exist. If it does, generate a unique one.
 	public static String checkFileName() {
 		int count = 1;
 		String name = "data" + count + "-" + "_MOTION_" + READING_FREQUENCY + "ms_" + MAX_RECORDS +"_RECORDS" + ".csv";
 		File data = new File(name);
 		while (data.exists()) {
-			// System.out.println("File " + data.getPath() + " exists.. Creating
-			// new file name 'data"+(count+1)+".csv'");
 			count++;
 			name = "data" + count + "-" + HOW_MANY_WORDS + "_MOTION_" + READING_FREQUENCY + "ms_" + MAX_RECORDS +"_LINES" + ".csv";
 			data = new File(name);
